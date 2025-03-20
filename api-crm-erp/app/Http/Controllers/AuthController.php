@@ -111,6 +111,10 @@ class AuthController extends Controller
             throw new RuntimeException('Wrong guard returned.');
         }
 
+        $permissions = auth("api")->user()->getAllPermissions()->map(function($perm) {
+            return $perm->name;
+        });
+
         return response()->json([
             'token_type' => 'Bearer',
             'access_token' => $guard->refresh(),
@@ -118,7 +122,9 @@ class AuthController extends Controller
             'user' =>[
                 "full_name" => $guard->user()->name.' '.$guard->user()->surname,
                 "email" => $guard->user()->email,
-                //avatar
+                "avatar" => auth('api')->user()->avatar ? env("APP_URL")."storage/".auth('api')->user()->avatar : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                "role_name" => auth("api")->user()->role->name,
+                "permissions" => $permissions,
             ]
         ]);
     }
